@@ -10,7 +10,7 @@ import org.springframework.context.annotation.*;
 import javax.sql.DataSource;
 
 @Configuration
-@PropertySource(value = "classpath:application.properties")
+@PropertySource(value = "classpath:application.yml")
 public class DatasourceConfig {
 
     @Bean(name = "hikariConfigPostgres")
