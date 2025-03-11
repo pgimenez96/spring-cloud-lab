@@ -1,23 +1,49 @@
+version: v1
 spring:
   application:
-    name: companies-crud
+    name: companies
+  main:
+    web-application-type: SERVLET
+  profiles:
+    active: '@activatedProperties@'
+  datasource:
+    companies-db-postgres:
+      driver-class-name: org.postgresql.Driver
+      connection-test-query: SELECT 1
+      connection-init-sql: SELECT 1
+      pool-name: companiesDbPostgresPool
+      hikari:
+        connection-timeout: 20000
+        maximum-pool-size: 5
+server:
+  servlet:
+    context-path: /@project.artifactId@
+springdoc:
+  show-actuator: true
+  swagger-ui:
+    disable-swagger-default-url: true
+    url: /@project.artifactId@/v3/api-docs
+management:
+  endpoints:
+    web.response.include: health, info, metrics, prometheus, caches, circuitbreakers, circuitbreakerevents
+    endpoint.health.show-details: always
+  metrics:
+    tags:
+      application: '@project.artifactId@'
+---
+spring:
+  config:
+    activate:
+      on-profile: develop
   datasource:
     companies-db-postgres:
       jdbc-url: jdbc:postgresql://localhost:5432/companies
       username: debuggeandoideas
       password: udemy
-      driver-class-name: org.postgresql.Driver
-      hikari:
-        connection-timeout: 20000
-        maximum-pool-size: 5
 server:
   port: 8081
-  servlet:
-    context-path: /companies
-
 log:
   level: DEBUG
-
 logging:
   level:
     org:
@@ -27,3 +53,13 @@ logging:
           descriptor:
             sql:
               BasicBinder: TRACE
+---
+spring:
+  config:
+    activate:
+      on-profile: release
+  datasource:
+    companies-db-postgres:
+      jdbc-url: ${COMPANIES-DB-JDBC-URL}
+      username: ${COMPANIES-DB-USERNAME}
+      password: ${COMPANIES-DB-PASSWORD}
