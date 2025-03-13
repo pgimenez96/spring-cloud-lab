@@ -6,8 +6,6 @@ spring:
     web-application-type: SERVLET
   profiles:
     active: '@activatedProperties@'
-  config:
-    import: "optional:configserver:http://localhost:7777"
   datasource:
     companies-db-postgres:
       driver-class-name: org.postgresql.Driver
@@ -48,11 +46,11 @@ spring:
       on-profile: develop
   datasource:
     companies-db-postgres:
-      jdbc-url: ${companies-db-postgres.jdbc-url}
-      username: ${companies-db-postgres.username}
-      password: ${companies-db-postgres.password}
+      jdbc-url: jdbc:postgresql://localhost:5432/companies
+      username: debuggeandoideas
+      password: udemy
 server:
-  port: 8081
+  port: 0
 log:
   level: DEBUG
 logging:
@@ -71,6 +69,6 @@ spring:
       on-profile: release
   datasource:
     companies-db-postgres:
-      jdbc-url: ${companies-db-postgres.jdbc-url}
-      username: ${companies-db-postgres.username}
-      password: ${companies-db-postgres.password}
+      jdbc-url: ${COMPANIES-DB-JDBC-URL}
+      username: ${COMPANIES-DB-USERNAME}
+      password: ${COMPANIES-DB-PASSWORD}
