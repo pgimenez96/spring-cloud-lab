@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: config.server
+  profiles:
+    active: default
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/pgimenez96/spring-cloud-lab.configs.git
+          default-label: main
+          clone-on-start: true
+
+server:
+  port: 7777
+
+eureka:
+  instance:
+    instance-id: "${spring.application.name}:${random.value}"
+  client:
+    server-url:
+      defaultZone: http://localhost:8761/eureka/
