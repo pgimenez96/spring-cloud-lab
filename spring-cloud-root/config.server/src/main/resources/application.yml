@@ -8,6 +8,8 @@ spring:
       server:
         git:
           uri: https://github.com/pgimenez96/spring-cloud-lab.configs.git
+          username: ${GIT_ACCESS_USER}
+          password: ${GIT_ACCESS_TOKEN}
           default-label: main
           clone-on-start: true
 
