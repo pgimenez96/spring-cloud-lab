@@ -4,6 +4,8 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 public class DotEnvLoader {
 
+    private DotEnvLoader() {}
+
     private static final Dotenv dotenv;
 
     // Cargar el archivo .env al inicializar la clase
