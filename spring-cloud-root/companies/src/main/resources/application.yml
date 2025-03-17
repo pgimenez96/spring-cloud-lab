@@ -52,7 +52,7 @@ spring:
       username: ${companies-db-postgres.username}
       password: ${companies-db-postgres.password}
 server:
-  port: 8081
+  port: 0
 log:
   level: DEBUG
 logging:
