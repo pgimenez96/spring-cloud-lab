@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: companies.fallback
+server:
+  servlet:
+    context-path: /@project.artifactId@
+  port: 8787
+eureka:
+  instance:
+    instance-id: "${spring.application.name}:${random.value}"
+    health-check-url-path: ${server.servlet.context-path}/actuator/health
+    status-page-url-path: ${server.servlet.context-path}/actuator/info
+    home-page-url-path: ${server.servlet.context-path}/
+  client:
+    server-url:
+      defaultZone: http://localhost:8761/eureka/
