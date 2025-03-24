@@ -2,10 +2,12 @@ package py.com.pgimenez.report.ms.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JCircuitBreakerFactory;
 import org.springframework.stereotype.Service;
 import py.com.pgimenez.report.ms.helper.ReportHelper;
 import py.com.pgimenez.report.ms.model.Company;
 import py.com.pgimenez.report.ms.model.WebSite;
+import py.com.pgimenez.report.ms.repository.CompanyFallbackRepository;
 import py.com.pgimenez.report.ms.repository.CompanyRepository;
 
 import java.time.LocalDate;
@@ -17,13 +19,18 @@ import java.util.stream.Stream;
 @Slf4j
 public class ReportServiceImpl implements ReportService {
 
-    private final CompanyRepository companyRepository;
-
     private final ReportHelper reportHelper;
+    private final CompanyRepository companyRepository;
+    private final CompanyFallbackRepository companyFallbackRepository;
+    private final Resilience4JCircuitBreakerFactory circuitBreakerFactory;
 
     @Override
     public String makeReport(String name) {
-        return reportHelper.readTemplate(this.companyRepository.getByName(name).orElseThrow());
+        var circuitBreaker = this.circuitBreakerFactory.create("companies-circuitbreaker");
+        return circuitBreaker.run(
+                () -> this.makeReportMain(name),
+                throwable -> this.makeReportFallback(name, throwable)
+        );
     }
 
     @Override
@@ -50,6 +57,15 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public void deleteReport(String name) {
         this.companyRepository.deleteByName(name);
+    }
+
+    private String makeReportMain(String name) {
+        return reportHelper.readTemplate(this.companyRepository.getByName(name).orElseThrow());
+    }
+
+    private String makeReportFallback(String name, Throwable error) {
+        log.warn(error.getMessage());
+        return reportHelper.readTemplate(this.companyFallbackRepository.getByName(name));
     }
 
 }
