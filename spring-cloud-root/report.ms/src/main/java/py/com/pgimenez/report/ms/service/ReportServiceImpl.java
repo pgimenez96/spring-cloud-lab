@@ -9,6 +9,7 @@ import py.com.pgimenez.report.ms.model.Company;
 import py.com.pgimenez.report.ms.model.WebSite;
 import py.com.pgimenez.report.ms.repository.CompanyFallbackRepository;
 import py.com.pgimenez.report.ms.repository.CompanyRepository;
+import py.com.pgimenez.report.ms.stream.ReportPublisher;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -23,6 +24,7 @@ public class ReportServiceImpl implements ReportService {
     private final CompanyRepository companyRepository;
     private final CompanyFallbackRepository companyFallbackRepository;
     private final Resilience4JCircuitBreakerFactory circuitBreakerFactory;
+    private final ReportPublisher reportPublisher;
 
     @Override
     public String makeReport(String name) {
@@ -48,10 +50,10 @@ public class ReportServiceImpl implements ReportService {
                 .webSites(webSites)
                 .build();
 
-        var companyRes = this.companyRepository.post(companyReq)
-                .orElseThrow();
+        this.companyRepository.post(companyReq);
+        this.reportPublisher.publishReport(report);
 
-        return companyRes.getName().concat(" company report saved");
+        return "Company report saved";
     }
 
     @Override

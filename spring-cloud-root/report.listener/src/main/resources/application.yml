@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: report.listener
+  profiles:
+    active: default
+  data:
+    mongodb:
+      authentication-database: admin
+      host: localhost
+      port: 27017
+      username: sa
+      password: sa
+server:
+  port: 0
+eureka:
+  instance:
+    instance-id: "${spring.application.name}:${random.value}"
+  client:
+    server-url:
+      defaultZone: http://localhost:8761/eureka/
+cloud:
+  stream:
+    kafka:
+      binder:
+        brokers: localhost:9092
+    function:
+      bindings:
+        consumerReport-in-0: # consumerReport-out -> consumerReport <- consumerReport-in
+          destination: consumerReport
