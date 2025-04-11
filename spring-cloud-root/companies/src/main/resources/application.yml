@@ -25,13 +25,6 @@ springdoc:
   swagger-ui:
     disable-swagger-default-url: true
     url: /v3/api-docs
-management:
-  endpoints:
-    web.response.include: health, info, metrics, prometheus, caches, circuitbreakers, circuitbreakerevents
-    endpoint.health.show-details: always
-  metrics:
-    tags:
-      application: '@project.artifactId@'
 eureka:
   instance:
     instance-id: "${spring.application.name}:${random.value}"
@@ -41,6 +34,39 @@ eureka:
   client:
     server-url:
       defaultZone: http://localhost:8761/eureka/
+management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+  otlp:
+    metrics:
+      export:
+        url: http://localhost:4318/v1/metrics
+        step: 10s
+    tracing:
+      endpoint: http://localhost:4318/v1/traces
+  metrics:
+    distribution:
+      percentiles:
+        do.sleep.method.timed: 0.99, 0.95, 0.9, 0.7, 0.5
+        http.server.requests: 0.99, 0.95, 0.9, 0.7, 0.5
+      percentiles-histogram:
+        do.sleep.method.timed: true
+        http.server.requests: true
+      minimum-expected-value:
+        do.sleep.method.timed: 100ms
+        http.server.requests: 100ms
+      maximum-expected-value:
+        do.sleep.method.timed: 10s
+        http.server.requests: 10s
+      slo:
+        do.sleep.method.timed: 300ms,500ms,1s,2s
+        http.server.requests: 300ms,500ms,1s,2s
+  endpoints:
+    web:
+      exposure:
+        include: '*'
 ---
 spring:
   config:
@@ -55,6 +81,8 @@ server:
   port: 0
 log:
   level: DEBUG
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
 logging:
   level:
     org:

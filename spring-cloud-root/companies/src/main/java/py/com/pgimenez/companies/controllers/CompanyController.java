@@ -1,5 +1,7 @@
 package py.com.pgimenez.companies.controllers;
 
+import io.micrometer.core.annotation.Timed;
+import io.micrometer.observation.annotation.Observed;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
@@ -22,6 +24,8 @@ public class CompanyController {
 
     @Operation(summary = "get a company given a company name")
     @GetMapping(path = "{name}")
+    @Observed(name = "get.company.name")
+    @Timed(value = "get.company.name")
     public ResponseEntity<Company> get(@PathVariable String name) {
         log.debug("GET company {}", name);
         return ResponseEntity.ok(this.companyService.readByName(name));
