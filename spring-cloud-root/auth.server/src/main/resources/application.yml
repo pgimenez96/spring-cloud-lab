@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: auth.server
+  profiles:
+    default: develop
+  config:
+    import: "optional:configserver:http://localhost:7777"
+  h2:
+    console:
+      enabled: true
+  # h2 console -> http://localhost:3000/auth.server/h2-console
+  datasource:
+    url: jdbc:h2:mem:users
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: sa
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+server:
+  port: 3030
+  servlet:
+    context-path: /@project.artifactId@
+eureka:
+  instance:
+    instance-id: "${spring.application.name}:${random.value}"
+    health-check-url-path: ${server.servlet.context-path}/actuator/health
+    status-page-url-path: ${server.servlet.context-path}/actuator/info
+    home-page-url-path: ${server.servlet.context-path}/
+  client:
+    server-url:
+      defaultZone: http://localhost:8761/eureka/
