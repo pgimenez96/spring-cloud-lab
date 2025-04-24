@@ -1,0 +1,656 @@
+{
+	"info": {
+		"_postman_id": "30653ed5-185b-47b7-8254-793e15487d8e",
+		"name": "spring-cloud-lab",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25859264"
+	},
+	"item": [
+		{
+			"name": "auth-ms",
+			"item": [
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"default\",\n    \"password\": \"secret\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{authMsRoute}}/auth.server/auth/login",
+							"host": [
+								"{{authMsRoute}}"
+							],
+							"path": [
+								"auth.server",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "verify",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accessToken",
+								"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkZWZhdWx0IiwiaWF0IjoxNzQ1NDIxMDkxLCJleHAiOjE3NDU0MjE0NTF9.3o8SFuYGZwZWTZEI4Wl9po-2ShooFRe8yD08Eez5P7pNAhexmPF4vsKJjN88GLEnEXMDj7FSK-d6IDLfVmn_bQ",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{authMsRoute}}/auth.server/auth/jwt",
+							"host": [
+								"{{authMsRoute}}"
+							],
+							"path": [
+								"auth.server",
+								"auth",
+								"jwt"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "gateway",
+			"item": [
+				{
+					"name": "company",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkZWZhdWx0IiwiaWF0IjoxNzQ1NTAzMjMyLCJleHAiOjE3NDU1MDM1OTJ9.jVuHMy6ApI1uSQUbzHPWjHkcEr36zypLoAduFDOyTHIfEOD0eldOK8RUv5UaB3byl3PCeL8bY4okRoGDcFiAiA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gatewayRoute}}/companies/company/DebuggeandoIdeas",
+							"host": [
+								"{{gatewayRoute}}"
+							],
+							"path": [
+								"companies",
+								"company",
+								"DebuggeandoIdeas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"default\",\n    \"password\": \"secret\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gatewayRoute}}/auth.server/auth/login",
+							"host": [
+								"{{gatewayRoute}}"
+							],
+							"path": [
+								"auth.server",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "company-faiback",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkZWZhdWx0IiwiaWF0IjoxNzAzODE3NzM1LCJleHAiOjE3MDM4MjEzMzV9.d-dfVPd7x6jXDl_7HezTBt9UkgM9Di9rNtb0cTa6KOfl75F-SDVN1TjV7AnfElC7VFmOyo8g8yK7GWRzEgiJMA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gatewayRoute}}/companies-crud-fallback/company/Facebook",
+							"host": [
+								"{{gatewayRoute}}"
+							],
+							"path": [
+								"companies-crud-fallback",
+								"company",
+								"Facebook"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "report",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkZWZhdWx0IiwiaWF0IjoxNzAzODE3NzM1LCJleHAiOjE3MDM4MjEzMzV9.d-dfVPd7x6jXDl_7HezTBt9UkgM9Di9rNtb0cTa6KOfl75F-SDVN1TjV7AnfElC7VFmOyo8g8yK7GWRzEgiJMA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{Uber} was founded in {14/08/2012} by {Some Owner} the websites from this company are {uber, uber eats}",
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gatewayRoute}}/report-ms/report",
+							"host": [
+								"{{gatewayRoute}}"
+							],
+							"path": [
+								"report-ms",
+								"report"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "report",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkZWZhdWx0IiwiaWF0IjoxNzAzODE3NzM1LCJleHAiOjE3MDM4MjEzMzV9.d-dfVPd7x6jXDl_7HezTBt9UkgM9Di9rNtb0cTa6KOfl75F-SDVN1TjV7AnfElC7VFmOyo8g8yK7GWRzEgiJMA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gatewayRoute}}/report.ms/report/Facebook",
+							"host": [
+								"{{gatewayRoute}}"
+							],
+							"path": [
+								"report.ms",
+								"report",
+								"Facebook"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "report",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkZWZhdWx0IiwiaWF0IjoxNzAzNjI1ODYzLCJleHAiOjE3MDM2Mjk0NjN9.dobwtAQJElCfxNWM6ulc2s1naUh_wXEh5bCnF3C_3Z9-qBlFiXRTRkkABRszSIcRfKod2cAdDijQmDIKet1xvw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{gatewayRoute}}/report-ms/report/Uber",
+							"host": [
+								"{{gatewayRoute}}"
+							],
+							"path": [
+								"report-ms",
+								"report",
+								"Uber"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "company",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkZWZhdWx0IiwiaWF0IjoxNzQ1NTAzMjMyLCJleHAiOjE3NDU1MDM1OTJ9.jVuHMy6ApI1uSQUbzHPWjHkcEr36zypLoAduFDOyTHIfEOD0eldOK8RUv5UaB3byl3PCeL8bY4okRoGDcFiAiA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"DebuggeandoIdeas\",\n    \"founder\": \"Rene Calderon\",\n    \"Logo\": \"http:/debuggeandoideas/logo\",\n    \"foundationDate\": \"25/08/2021\",\n    \"webSites\": [\n        {\n            \"name\": \"Debuggeando ideas youtebe\",\n            \"category\": \"EDUCATION\",\n            \"description\": \"Ia a education chanel\"\n        },\n               {\n            \"name\": \"Debuggeando ideas Udemy\",\n            \"category\": \"EDUCATION\",\n            \"description\": \"Ia a education chanel\"\n        }\n\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gatewayRoute}}/companies/company",
+							"host": [
+								"{{gatewayRoute}}"
+							],
+							"path": [
+								"companies",
+								"company"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "report-ms",
+			"item": [
+				{
+					"name": "report",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{Uber} was founded in {14/08/2012} by {Some Owner} the websites from this company are {uber, uber eats}",
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{reportMsRoute}}/report.ms/report",
+							"host": [
+								"{{reportMsRoute}}"
+							],
+							"path": [
+								"report.ms",
+								"report"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "report Copy",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{Uber} was founded in {14/08/2012} by {Some Owner} the websites from this company are {uber, uber eats}",
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{reportMsRoute}}/report-ms/report",
+							"host": [
+								"{{reportMsRoute}}"
+							],
+							"path": [
+								"report-ms",
+								"report"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "report",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{reportMsRoute}}/report.ms/report/Uber",
+							"host": [
+								"{{reportMsRoute}}"
+							],
+							"path": [
+								"report.ms",
+								"report",
+								"Uber"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "report",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkZWZhdWx0IiwiaWF0IjoxNzAzNjQ0MDY5LCJleHAiOjE3MDM2NDc2Njl9.t95lkVgDuPmkLmulQ9sU6nbqLjQpKaoGIf4GAurKztXP1wjPtM-bs--JUCRdPnD826u1BBx1sqEn08xfo_RDIg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{reportMsRoute}}/report.ms/report/Uber",
+							"host": [
+								"{{reportMsRoute}}"
+							],
+							"path": [
+								"report.ms",
+								"report",
+								"Uber"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "config-server",
+			"item": [
+				{
+					"name": "configs-web.sites",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{configServerRoute}}/companies/develop",
+							"host": [
+								"{{configServerRoute}}"
+							],
+							"path": [
+								"companies",
+								"develop"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "web-sites-companies",
+			"item": [
+				{
+					"name": "company",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{webSiteCompaniesMsRoute}}/companies/company/Google",
+							"host": [
+								"{{webSiteCompaniesMsRoute}}"
+							],
+							"path": [
+								"companies",
+								"company",
+								"Google"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "company",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{webSiteCompaniesMsRoute}}/companies-crud/company/Facebook",
+							"host": [
+								"{{webSiteCompaniesMsRoute}}"
+							],
+							"path": [
+								"companies-crud",
+								"company",
+								"Facebook"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "company",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkZWZhdWx0IiwiaWF0IjoxNzAzNjE5NTAyLCJleHAiOjE3MDM2MjMxMDJ9.nd1xvZENN9W6MZR78Pd7prWweoZZrX4MaxgOTRuRanD98qKF6riWW1NLd8_Uyu8nhBdspGl0MuAQmNlum3E7nQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"DebuggeandoIdeas\",\n    \"founder\": \"Rene Calderon\",\n    \"logo\": \"http:/debuggeandoideas/logo\",\n    \"foundationDate\": \"25/08/2021\",\n    \"webSites\": [\n        {\n            \"name\": \"Debuggeando ideas youtebe\",\n            \"category\": \"EDUCATION\",\n            \"description\": \"Ia a education chanel\"\n        },\n               {\n            \"name\": \"Debuggeando ideas Udemy\",\n            \"category\": \"EDUCATION\",\n            \"description\": \"Ia a education chanel\"\n        }\n\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{webSiteCompaniesMsRoute}}/companies-crud/company",
+							"host": [
+								"{{webSiteCompaniesMsRoute}}"
+							],
+							"path": [
+								"companies-crud",
+								"company"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "company",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkZWZhdWx0IiwiaWF0IjoxNzAzNjE5NTAyLCJleHAiOjE3MDM2MjMxMDJ9.nd1xvZENN9W6MZR78Pd7prWweoZZrX4MaxgOTRuRanD98qKF6riWW1NLd8_Uyu8nhBdspGl0MuAQmNlum3E7nQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"DebuggeandoIdeas\",\n    \"founder\": \"Alejando Calderon\",\n    \"logo\": \"http:/debuggeandoideas/updated-logo\",\n    \"foundationDate\": \"25/08/2020\",\n    \"webSites\": [\n        {\n            \"name\": \"Debuggeando ideas youtebe\",\n            \"category\": \"EDUCATION\",\n            \"description\": \"Ia a education chanel\"\n        },\n               {\n            \"name\": \"Debuggeando ideas Udemy\",\n            \"category\": \"EDUCATION\",\n            \"description\": \"Ia a education chanel\"\n        }\n\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{webSiteCompaniesMsRoute}}/companies-crud/company/DebuggeandoIdeas",
+							"host": [
+								"{{webSiteCompaniesMsRoute}}"
+							],
+							"path": [
+								"companies-crud",
+								"company",
+								"DebuggeandoIdeas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{webSiteCompaniesMsRoute}}/companies-crud/actuator/health",
+							"host": [
+								"{{webSiteCompaniesMsRoute}}"
+							],
+							"path": [
+								"companies-crud",
+								"actuator",
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "web-sites-companies-fallback",
+			"item": [
+				{
+					"name": "get-company",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{webSiteCompaniesFallback}}/companies.fallback/company/Facebook",
+							"host": [
+								"{{webSiteCompaniesFallback}}"
+							],
+							"path": [
+								"companies.fallback",
+								"company",
+								"Facebook"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "companies-actuator-company.name",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{webSiteCompaniesMsRoute}}/companies-crud/actuator/metrics",
+					"host": [
+						"{{webSiteCompaniesMsRoute}}"
+					],
+					"path": [
+						"companies-crud",
+						"actuator",
+						"metrics"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "authMsRoute",
+			"value": "http://localhost:3030",
+			"type": "string"
+		},
+		{
+			"key": "gatewayRoute",
+			"value": "http://localhost:4040",
+			"type": "string"
+		},
+		{
+			"key": "reportMsRoute",
+			"value": "http://localhost:7070",
+			"type": "string"
+		},
+		{
+			"key": "configServerRoute",
+			"value": "http://localhost:7777",
+			"type": "string"
+		},
+		{
+			"key": "webSiteCompaniesMsRoute",
+			"value": "http://localhost:8081",
+			"type": "string"
+		},
+		{
+			"key": "webSiteCompaniesFallback",
+			"value": "http://localhost:8787",
+			"type": "string"
+		}
+	]
+}

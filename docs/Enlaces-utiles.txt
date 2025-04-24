@@ -1,0 +1,2 @@
+proyecto -> https://github.com/alejandrocalderonhernandez/microservices-course
+configuraciones -> https://github.com/alejandrocalderonhernandez/microservice-configs
