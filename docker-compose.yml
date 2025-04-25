@@ -51,3 +51,10 @@ services:
       MONGO_INITDB_DATABASE: reports
     ports:
       - "27017:27017"
+
+  mcs-registry.server:
+    image: mcs-registry.server:latest
+    container_name: mcs-registry.server
+    restart: always
+    ports:
+      - "8761:8761"
