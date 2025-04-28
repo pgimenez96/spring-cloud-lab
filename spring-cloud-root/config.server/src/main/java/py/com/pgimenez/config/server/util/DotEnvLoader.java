@@ -1,26 +1,38 @@
 package py.com.pgimenez.config.server.util;
 
+import java.util.Objects;
+
 import io.github.cdimascio.dotenv.Dotenv;
+import io.github.cdimascio.dotenv.DotenvException;
 
 public class DotEnvLoader {
 
-    private DotEnvLoader() {}
+    private Dotenv dotenv;
 
-    private static final Dotenv dotenv;
-
-    // Cargar el archivo .env al inicializar la clase
-    static {
-        dotenv = Dotenv.configure().load();
+    public DotEnvLoader(String profile) {
+        try {
+            dotenv = Dotenv.configure()
+                .directory("./")
+                .filename(".env." + profile)
+                .load();
+        } catch (DotenvException e) {
+            dotenv = null;
+        }
     }
 
     // Método para obtener una variable del archivo .env
-    public static String get(String key) {
-        return dotenv.get(key);
+    public String get(String key) {
+        return Objects.nonNull(dotenv)
+            ? dotenv.get(key)
+            : null;
     }
 
     // Método para cargar todas las variables del archivo .env en las propiedades del sistema
-    public static void loadIntoSystemProperties() {
-        dotenv.entries().forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));
+    public void loadIntoSystemProperties() {
+        if (Objects.nonNull(dotenv)) {
+            dotenv.entries().forEach(entry ->
+                System.setProperty(entry.getKey(), entry.getValue()));
+        }
     }
 
 }

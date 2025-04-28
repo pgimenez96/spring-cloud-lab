@@ -2,7 +2,7 @@ spring:
   application:
     name: config.server
   profiles:
-    active: default
+    active: develop
   cloud:
     config:
       server:
@@ -21,4 +21,4 @@ eureka:
     instance-id: "${spring.application.name}:${random.value}"
   client:
     server-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_SERVER_URL}

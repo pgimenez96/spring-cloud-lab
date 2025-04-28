@@ -34,3 +34,4 @@ build/
 
 # Ignorar el archivo .env
 .env
+.env.*
