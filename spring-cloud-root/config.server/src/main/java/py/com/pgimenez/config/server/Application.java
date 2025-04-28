@@ -1,6 +1,5 @@
 package py.com.pgimenez.config.server;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
@@ -12,9 +11,6 @@ import py.com.pgimenez.config.server.config.EarlyProfileInitializer;
 @EnableConfigServer
 @EnableDiscoveryClient
 public class Application {
-
-	@Value("${spring.profiles.active}")
-	private String profile;
 
 	public static void main(String[] args) {
 		SpringApplication app = new SpringApplication(Application.class);
