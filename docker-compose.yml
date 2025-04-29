@@ -1,5 +1,5 @@
 services:
-  postgres:
+  postgres-db-companies:
     image: postgres:16.1
     container_name: postgres-db-companies
     restart: always
@@ -12,6 +12,11 @@ services:
       POSTGRES_PASSWORD: 'udemy'
     ports:
       - '5432:5432'
+    healthcheck: # Comprueba estado de salud del servicio
+      test: ["CMD-SHELL", "pg_isready -U debuggeandoideas -d companies"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.3
@@ -22,13 +27,19 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8080/commands/ruok | grep -q '\"error\" : null' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   kafka:
     image: confluentinc/cp-kafka:7.4.3
     container_name: msg-broker
     restart: always
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
@@ -39,6 +50,12 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
     ports:
       - "9092:9092"
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --list --bootstrap-server localhost:9092"]
+      interval: 15s
+      timeout: 10s
+      retries: 6
+      start_period: 30s  # Kafka tarda en iniciarse
 
   mongo-db:
     image: mongo:7.0.5-rc0
@@ -51,6 +68,11 @@ services:
       MONGO_INITDB_DATABASE: reports
     ports:
       - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 8s
+      retries: 5
 
   mcs-registry.server:
     image: mcs-registry.server:latest
@@ -58,6 +80,12 @@ services:
     restart: always
     ports:
       - "8761:8761"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8761/actuator/health || exit 1"]
+      interval: 15s      # ✔️ Buen balance entre carga y detección rápida
+      timeout: 30s       # ✔️ Eureka puede tardar en iniciarse (especialmente en frío)
+      retries: 10        # ✔️ Suficiente para problemas temporales
+      start_period: 45s  # ✔️ Tiempo de gracia para Spring Boot
   mcs-config.server:
     image: mcs-config.server:latest
     container_name: mcs-config.server
@@ -65,6 +93,33 @@ services:
     ports:
       - "7777:7777"
     depends_on:
-      - mcs-registry.server
+      mcs-registry.server:
+        condition: service_healthy
     environment:
       - EUREKA_SERVER_URL=http://mcs-registry.server:8761/eureka/
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:7777/actuator/health || exit 1"]
+      interval: 20s      # ▲ Aumentado (depende de Eureka)
+      timeout: 45s       # ✔️ Config Server necesita más tiempo para cargar configs
+      retries: 12        # ▲ Más reintentos por sus dependencias
+      start_period: 90s  # ✔️ Espera generosa (carga configuraciones)
+  mcs-companies:
+    image: mcs-companies:latest
+    container_name: mcs-companies
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      mcs-config.server:
+        condition: service_healthy  # Espera a que Config Server esté saludable
+      postgres-db-companies:
+        condition: service_healthy  # Espera a que PostgreSQL acepte conexiones
+    environment:
+      - EUREKA_SERVER_URL=http://mcs-registry.server:8761/eureka/
+      - CONFIG_SERVER_URL=http://mcs-config.server:7777
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8080/actuator/health || exit 1"]
+      interval: 25s      # ▲ Checks menos frecuentes (servicio final)
+      timeout: 60s       # ▲ Máximo tiempo (depende de DB + Config Server + Eureka)
+      retries: 15        # ▲ Máximos reintentos (último eslabón)
+      start_period: 100s # ✔️ Espera muy generosa (inicializa todas las dependencias)

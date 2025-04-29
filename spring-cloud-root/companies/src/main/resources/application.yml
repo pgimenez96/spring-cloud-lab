@@ -6,8 +6,6 @@ spring:
     web-application-type: SERVLET
   profiles:
     active: '@activatedProperties@'
-  config:
-    import: "optional:configserver:http://localhost:7777"
   datasource:
     companies-db-postgres:
       driver-class-name: org.postgresql.Driver
@@ -38,14 +36,12 @@ eureka:
     health-check-url-path: ${server.servlet.context-path}/actuator/health
     status-page-url-path: ${server.servlet.context-path}/actuator/info
     home-page-url-path: ${server.servlet.context-path}/
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
 ---
 spring:
   config:
     activate:
       on-profile: develop
+    import: "optional:configserver:http://localhost:7777"
   datasource:
     companies-db-postgres:
       jdbc-url: ${companies-db-postgres.jdbc-url}
@@ -64,13 +60,22 @@ logging:
           descriptor:
             sql:
               BasicBinder: TRACE
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
 ---
 spring:
   config:
     activate:
       on-profile: release
+    import: "optional:configserver:${CONFIG_SERVER_URL}"
   datasource:
     companies-db-postgres:
       jdbc-url: ${companies-db-postgres.jdbc-url}
       username: ${companies-db-postgres.username}
       password: ${companies-db-postgres.password}
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL}
