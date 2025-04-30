@@ -6,24 +6,24 @@ spring:
   data:
     mongodb:
       authentication-database: admin
-      host: localhost
+      host: ${MONGO_HOST:localhost}
       port: 27017
       username: sa
       password: sa
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: ${BROKER_URL:localhost:9092}
+      function:
+        bindings:
+          consumerReport-in-0: # consumerReport-out -> consumerReport <- consumerReport-in
+            destination: consumerReport
 server:
-  port: 0
+  port: 7071
 eureka:
   instance:
     instance-id: "${spring.application.name}:${random.value}"
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
-cloud:
-  stream:
-    kafka:
-      binder:
-        brokers: localhost:9092
-    function:
-      bindings:
-        consumerReport-in-0: # consumerReport-out -> consumerReport <- consumerReport-in
-          destination: consumerReport
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}

@@ -33,9 +33,9 @@ services:
       timeout: 5s
       retries: 5
 
-  kafka:
+  kafka-msg-broker:
     image: confluentinc/cp-kafka:7.4.3
-    container_name: msg-broker
+    container_name: kafka-msg-broker
     restart: always
     depends_on:
       zookeeper:
@@ -44,7 +44,8 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://broker:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-msg-broker:9092,PLAINTEXT_INTERNAL://kafka-msg-broker:29092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_INTERNAL://0.0.0.0:29092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
@@ -70,9 +71,9 @@ services:
       - "27017:27017"
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
+      interval: 15s
       timeout: 8s
-      retries: 5
+      retries: 3
 
   mcs-registry.server:
     image: mcs-registry.server:latest
@@ -123,3 +124,64 @@ services:
       timeout: 60s       # ▲ Máximo tiempo (depende de DB + Config Server + Eureka)
       retries: 15        # ▲ Máximos reintentos (último eslabón)
       start_period: 100s # ✔️ Espera muy generosa (inicializa todas las dependencias)
+  mcs-companies.fallback:
+    image: mcs-companies.fallback:latest
+    container_name: mcs-companies.fallback
+    restart: always
+    ports:
+      - "8787:8787"
+    depends_on:
+      mcs-registry.server:
+        condition: service_healthy
+    environment:
+      - EUREKA_SERVER_URL=http://mcs-registry.server:8761/eureka/
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8787/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 30s
+      retries: 10
+      start_period: 90s
+  mcs-report.ms:
+    image: mcs-report.ms:latest
+    container_name: mcs-report.ms
+    restart: always
+    ports:
+      - "7070:7070"
+    depends_on:
+      mcs-config.server:
+        condition: service_healthy  # Espera a que Config Server esté saludable
+      mcs-registry.server:
+        condition: service_healthy
+      kafka-msg-broker:
+        condition: service_healthy
+    environment:
+      - EUREKA_SERVER_URL=http://mcs-registry.server:8761/eureka/
+      - CONFIG_SERVER_URL=http://mcs-config.server:7777
+      - BROKER_URL=kafka-msg-broker:9092
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:7070/report.ms/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 30s
+      retries: 10
+      start_period: 90s
+  mcs-report.listener:
+    image: mcs-report.listener:latest
+    container_name: mcs-report.listener
+    restart: always
+    ports:
+      - "7071:7071"
+    depends_on:
+      mongo-db:
+        condition: service_healthy
+      mcs-report.ms:
+        condition: service_healthy
+    environment:
+      - MONGO_HOST=mongo-db
+      - BROKER_URL=kafka-msg-broker:9092
+      - EUREKA_SERVER_URL=http://mcs-registry.server:8761/eureka/
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:7071/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 30s
+      retries: 10
+      start_period: 90s
