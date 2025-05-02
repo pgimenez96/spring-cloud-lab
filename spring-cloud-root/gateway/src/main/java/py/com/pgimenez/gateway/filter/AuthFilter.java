@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
 @Component
 public class AuthFilter implements GatewayFilter {
 
-    public static final String AUTH_VALIDATE_URI         = "http://mcs-auth.server:3030/auth.server/auth/jwt";
+    public static final String AUTH_VALIDATE_URI         = "http://mcs-auth.server:3030/auth.server/auth/jwt"; // TODO: definir url como config
     private static final String ACCESS_TOKEN_HEADER_NAME = "accessToken";
 
     private final WebClient webClient;
