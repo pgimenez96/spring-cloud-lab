@@ -1,7 +1,7 @@
 services:
-  postgres-db-companies:
+  springcloud-postgres.db.companies:
     image: postgres:16.1
-    container_name: postgres-db-companies
+    container_name: springcloud-postgres.db.companies
     restart: always
     volumes:
       - ./sql/create_schema.sql:/docker-entrypoint-initdb.d/create_schema.sql
@@ -18,9 +18,9 @@ services:
       timeout: 5s
       retries: 10
 
-  zookeeper:
+  springcloud-zookeeper:
     image: confluentinc/cp-zookeeper:7.4.3
-    container_name: load-balancer
+    container_name: springcloud-zookeeper
     restart: always
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
@@ -33,18 +33,18 @@ services:
       timeout: 5s
       retries: 5
 
-  kafka-msg-broker:
+  springcloud-kafka.broker:
     image: confluentinc/cp-kafka:7.4.3
-    container_name: kafka-msg-broker
+    container_name: springcloud-kafka.broker
     restart: always
     depends_on:
-      zookeeper:
+      springcloud-zookeeper:
         condition: service_healthy
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-msg-broker:9092,PLAINTEXT_INTERNAL://kafka-msg-broker:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://springcloud-kafka.broker:9092,PLAINTEXT_INTERNAL://springcloud-kafka.broker:29092
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_INTERNAL://0.0.0.0:29092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
@@ -58,10 +58,10 @@ services:
       retries: 6
       start_period: 30s  # Kafka tarda en iniciarse
 
-  mongo-db:
+  springcloud-mongo.db:
     image: mongo:7.0.5-rc0
+    container_name: springcloud-mongo.db
     restart: always
-    container_name: mongo-db
     hostname: mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: sa
@@ -75,9 +75,12 @@ services:
       timeout: 8s
       retries: 3
 
-  mcs-registry.server:
-    image: mcs-registry.server:latest
-    container_name: mcs-registry.server
+  springcloud-registry.server:
+    build: 
+      context: ./registry.server
+      dockerfile: Dockerfile
+    image: springcloud/registry.server:latest
+    container_name: springcloud-registry.server
     restart: always
     ports:
       - "8761:8761"
@@ -86,134 +89,162 @@ services:
       interval: 15s      # ✔️ Buen balance entre carga y detección rápida
       timeout: 30s       # ✔️ Eureka puede tardar en iniciarse (especialmente en frío)
       retries: 10        # ✔️ Suficiente para problemas temporales
-      start_period: 45s  # ✔️ Tiempo de gracia para Spring Boot
-  mcs-config.server:
-    image: mcs-config.server:latest
-    container_name: mcs-config.server
+      tart_period: 45s  # ✔️ Tiempo de gracia para Spring Boot
+
+  springcloud-config.server:
+    build: 
+      context: ./config.server
+      dockerfile: Dockerfile
+    image: springcloud/config.server:latest
+    container_name: springcloud-config.server
     restart: always
     ports:
       - "7777:7777"
     depends_on:
-      mcs-registry.server:
+      springcloud-registry.server:
         condition: service_healthy
     environment:
-      - EUREKA_SERVER_URL=http://mcs-registry.server:8761/eureka/
+      - EUREKA_SERVER_URL=http://springcloud-registry.server:8761/eureka/
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:7777/actuator/health || exit 1"]
       interval: 20s      # ▲ Aumentado (depende de Eureka)
       timeout: 45s       # ✔️ Config Server necesita más tiempo para cargar configs
       retries: 12        # ▲ Más reintentos por sus dependencias
       start_period: 90s  # ✔️ Espera generosa (carga configuraciones)
-  mcs-companies:
-    image: mcs-companies:latest
-    container_name: mcs-companies
+
+  springcloud-companies:
+    build: 
+      context: ./companies
+      dockerfile: Dockerfile
+    image: springcloud/companies:latest
+    container_name: springcloud-companies
     restart: always
     ports:
       - "8080:8080"
     depends_on:
-      mcs-config.server:
+      springcloud-config.server:
         condition: service_healthy  # Espera a que Config Server esté saludable
-      postgres-db-companies:
+      springcloud-postgres.db.companies:
         condition: service_healthy  # Espera a que PostgreSQL acepte conexiones
     environment:
-      - EUREKA_SERVER_URL=http://mcs-registry.server:8761/eureka/
-      - CONFIG_SERVER_URL=http://mcs-config.server:7777
+      - EUREKA_SERVER_URL=http://springcloud-registry.server:8761/eureka/
+      - CONFIG_SERVER_URL=http://springcloud-config.server:7777
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8080/actuator/health || exit 1"]
       interval: 25s      # ▲ Checks menos frecuentes (servicio final)
       timeout: 60s       # ▲ Máximo tiempo (depende de DB + Config Server + Eureka)
       retries: 15        # ▲ Máximos reintentos (último eslabón)
       start_period: 100s # ✔️ Espera muy generosa (inicializa todas las dependencias)
-  mcs-companies.fallback:
-    image: mcs-companies.fallback:latest
-    container_name: mcs-companies.fallback
+
+  springcloud-companies.fallback:
+    build: 
+      context: ./companies.fallback
+      dockerfile: Dockerfile
+    image: springcloud/companies.fallback:latest
+    container_name: springcloud-companies.fallback
     restart: always
     ports:
       - "8787:8787"
     depends_on:
-      mcs-registry.server:
+      springcloud-registry.server:
         condition: service_healthy
     environment:
-      - EUREKA_SERVER_URL=http://mcs-registry.server:8761/eureka/
+      - EUREKA_SERVER_URL=http://springcloud-registry.server:8761/eureka/
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8787/actuator/health || exit 1"]
       interval: 10s
       timeout: 30s
       retries: 10
       start_period: 90s
-  mcs-report.ms:
-    image: mcs-report.ms:latest
-    container_name: mcs-report.ms
+
+  springcloud-report.ms:
+    build: 
+      context: ./report.ms
+      dockerfile: Dockerfile
+    image: springcloud/report.ms:latest
+    container_name: springcloud-report.ms
     restart: always
     ports:
       - "7070:7070"
     depends_on:
-      mcs-config.server:
+      springcloud-config.server:
         condition: service_healthy  # Espera a que Config Server esté saludable
-      mcs-registry.server:
+      springcloud-registry.server:
         condition: service_healthy
-      kafka-msg-broker:
+      springcloud-kafka.broker:
         condition: service_healthy
     environment:
-      - EUREKA_SERVER_URL=http://mcs-registry.server:8761/eureka/
-      - CONFIG_SERVER_URL=http://mcs-config.server:7777
-      - BROKER_URL=kafka-msg-broker:9092
+      - EUREKA_SERVER_URL=http://springcloud-registry.server:8761/eureka/
+      - CONFIG_SERVER_URL=http://springcloud-config.server:7777
+      - BROKER_URL=springcloud-kafka.broker:9092
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:7070/report.ms/actuator/health || exit 1"]
       interval: 10s
       timeout: 30s
       retries: 10
       start_period: 90s
-  mcs-report.listener:
-    image: mcs-report.listener:latest
-    container_name: mcs-report.listener
+
+  springcloud-report.listener:
+    build: 
+      context: ./report.listener
+      dockerfile: Dockerfile
+    image: springcloud/report.listener:latest
+    container_name: springcloud-report.listener
     restart: always
     ports:
       - "7071:7071"
     depends_on:
-      mongo-db:
+      springcloud-mongo.db:
         condition: service_healthy
-      mcs-report.ms:
+      springcloud-report.ms:
         condition: service_healthy
     environment:
-      - MONGO_HOST=mongo-db
-      - BROKER_URL=kafka-msg-broker:9092
-      - EUREKA_SERVER_URL=http://mcs-registry.server:8761/eureka/
+      - MONGO_HOST=springcloud-mongo.db
+      - BROKER_URL=springcloud-kafka.broker:9092
+      - EUREKA_SERVER_URL=http://springcloud-registry.server:8761/eureka/
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:7071/actuator/health || exit 1"]
       interval: 10s
       timeout: 30s
       retries: 10
       start_period: 90s
-  mcs-auth.server:
-    image: mcs-auth.server:latest
-    container_name: mcs-auth.server
+
+  springcloud-auth.server:
+    build: 
+      context: ./auth.server
+      dockerfile: Dockerfile
+    image: springcloud/auth.server:latest
+    container_name: springcloud-auth.server
     restart: always
     ports:
       - "3030:3030"
     depends_on:
-      mcs-config.server:
+      springcloud-config.server:
         condition: service_healthy
     environment:
-      - EUREKA_SERVER_URL=http://mcs-registry.server:8761/eureka/
-      - CONFIG_SERVER_URL=http://mcs-config.server:7777
+      - EUREKA_SERVER_URL=http://springcloud-registry.server:8761/eureka/
+      - CONFIG_SERVER_URL=http://springcloud-config.server:7777
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:3030/actuator/health || exit 1"]
       interval: 10s
       timeout: 30s
       retries: 10
       start_period: 90s
-  mcs-gateway:
-    image: mcs-gateway:latest
-    container_name: mcs-gateway
+
+  springcloud-gateway:
+    build: 
+      context: ./gateway
+      dockerfile: Dockerfile
+    image: springcloud/gateway:latest
+    container_name: springcloud-gateway
     restart: always
     ports:
       - "4040:4040"
     depends_on:
-      mcs-registry.server:
+      springcloud-registry.server:
         condition: service_healthy
     environment:
-      - EUREKA_SERVER_URL=http://mcs-registry.server:8761/eureka/
+      - EUREKA_SERVER_URL=http://springcloud-registry.server:8761/eureka/
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:4040/actuator/health || exit 1"]
       interval: 10s

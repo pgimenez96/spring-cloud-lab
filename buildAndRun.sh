@@ -26,7 +26,7 @@ build_service "auth.server"
 build_service "gateway"
 
 # Construir y levantar los contenedores
-echo "🐳 Iniciando contenedores con Docker Compose..."
-docker-compose -f "${COMPOSE_FILE}" up --build
+# echo "🐳 Iniciando contenedores con Docker Compose..."
+# docker-compose -f "${COMPOSE_FILE}" up --build
 
 echo "🚀 Todos los servicios están en marcha!"
