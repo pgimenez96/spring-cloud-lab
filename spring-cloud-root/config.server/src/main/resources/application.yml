@@ -2,7 +2,7 @@ spring:
   application:
     name: config.server
   profiles:
-    active: release
+    active: develop
   cloud:
     config:
       server:

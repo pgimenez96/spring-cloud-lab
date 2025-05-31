@@ -42,7 +42,7 @@ services:
         condition: service_healthy
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_ZOOKEEPER_CONNECT: 'springcloud-zookeeper:2181'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://springcloud-kafka.broker:9092,PLAINTEXT_INTERNAL://springcloud-kafka.broker:29092
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_INTERNAL://0.0.0.0:29092
@@ -77,7 +77,7 @@ services:
 
   springcloud-registry.server:
     build: 
-      context: ./registry.server
+      context: ./spring-cloud-root/registry.server
       dockerfile: Dockerfile
     image: springcloud/registry.server:latest
     container_name: springcloud-registry.server
@@ -89,11 +89,11 @@ services:
       interval: 15s      # ✔️ Buen balance entre carga y detección rápida
       timeout: 30s       # ✔️ Eureka puede tardar en iniciarse (especialmente en frío)
       retries: 10        # ✔️ Suficiente para problemas temporales
-      tart_period: 45s  # ✔️ Tiempo de gracia para Spring Boot
+      start_period: 45s  # ✔️ Tiempo de gracia para Spring Boot
 
   springcloud-config.server:
     build: 
-      context: ./config.server
+      context: ./spring-cloud-root/config.server
       dockerfile: Dockerfile
     image: springcloud/config.server:latest
     container_name: springcloud-config.server
@@ -114,7 +114,7 @@ services:
 
   springcloud-companies:
     build: 
-      context: ./companies
+      context: ./spring-cloud-root/companies
       dockerfile: Dockerfile
     image: springcloud/companies:latest
     container_name: springcloud-companies
@@ -138,7 +138,7 @@ services:
 
   springcloud-companies.fallback:
     build: 
-      context: ./companies.fallback
+      context: ./spring-cloud-root/companies.fallback
       dockerfile: Dockerfile
     image: springcloud/companies.fallback:latest
     container_name: springcloud-companies.fallback
@@ -159,7 +159,7 @@ services:
 
   springcloud-report.ms:
     build: 
-      context: ./report.ms
+      context: ./spring-cloud-root/report.ms
       dockerfile: Dockerfile
     image: springcloud/report.ms:latest
     container_name: springcloud-report.ms
@@ -186,7 +186,7 @@ services:
 
   springcloud-report.listener:
     build: 
-      context: ./report.listener
+      context: ./spring-cloud-root/report.listener
       dockerfile: Dockerfile
     image: springcloud/report.listener:latest
     container_name: springcloud-report.listener
@@ -211,7 +211,7 @@ services:
 
   springcloud-auth.server:
     build: 
-      context: ./auth.server
+      context: ./spring-cloud-root/auth.server
       dockerfile: Dockerfile
     image: springcloud/auth.server:latest
     container_name: springcloud-auth.server
@@ -233,7 +233,7 @@ services:
 
   springcloud-gateway:
     build: 
-      context: ./gateway
+      context: ./spring-cloud-root/gateway
       dockerfile: Dockerfile
     image: springcloud/gateway:latest
     container_name: springcloud-gateway

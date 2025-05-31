@@ -12,6 +12,7 @@ build_service() {
   mvn clean package -DskipTests
   cd "${SCRIPT_DIR}"
   echo "✅ $service_dir construido correctamente"
+  echo    # Esto imprime un salto de línea
 }
 
 # Construir todos los microservicios
@@ -26,7 +27,7 @@ build_service "auth.server"
 build_service "gateway"
 
 # Construir y levantar los contenedores
-# echo "🐳 Iniciando contenedores con Docker Compose..."
-# docker-compose -f "${COMPOSE_FILE}" up --build
+echo "🐳 Iniciando contenedores con Docker Compose..."
+sudo docker compose -f "${COMPOSE_FILE}" up --build
 
 echo "🚀 Todos los servicios están en marcha!"
