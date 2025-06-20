@@ -5,7 +5,7 @@ spring:
   main:
     web-application-type: SERVLET
   profiles:
-    active: release
+    active: develop
   datasource:
     companies-db-postgres:
       driver-class-name: org.postgresql.Driver
@@ -47,6 +47,15 @@ spring:
       jdbc-url: ${companies-db-postgres.jdbc-url}
       username: ${companies-db-postgres.username}
       password: ${companies-db-postgres.password}
+  kafka:
+    listener:
+      ack-mode: manual_immediate
+    consumer:
+      bootstrap-servers: localhost:9092
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      group-id: circuitbreaker
 server:
   port: 0
 log:

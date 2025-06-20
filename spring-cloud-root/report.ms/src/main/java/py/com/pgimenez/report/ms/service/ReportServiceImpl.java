@@ -1,5 +1,7 @@
 package py.com.pgimenez.report.ms.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JCircuitBreakerFactory;
@@ -25,6 +27,7 @@ public class ReportServiceImpl implements ReportService {
     private final CompanyFallbackRepository companyFallbackRepository;
     private final Resilience4JCircuitBreakerFactory circuitBreakerFactory;
     private final ReportPublisher reportPublisher;
+    private final ObjectMapper objectMapper;
 
     @Override
     public String makeReport(String name) {
@@ -50,7 +53,12 @@ public class ReportServiceImpl implements ReportService {
                 .webSites(webSites)
                 .build();
 
-        this.companyRepository.post(companyReq);
+        var circuitBreaker = this.circuitBreakerFactory.create("companies-circuitbreaker-event");
+        circuitBreaker.run(
+                () -> this.companyRepository.post(companyReq),
+                throwable -> this.reportPublisher.publishCbReport(this.buildEventMsg(companyReq))
+        );
+
         this.reportPublisher.publishReport(report);
 
         return "Company report saved";
@@ -68,6 +76,14 @@ public class ReportServiceImpl implements ReportService {
     private String makeReportFallback(String name, Throwable error) {
         log.warn(error.getMessage());
         return reportHelper.readTemplate(this.companyFallbackRepository.getByName(name));
+    }
+
+    private String buildEventMsg(Company company) {
+        try {
+            return this.objectMapper.writeValueAsString(company);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
